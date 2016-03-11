@@ -1,3 +1,8 @@
+'''
+(c) 2016 Carlo Morelli
+Relased under MIT License
+'''
+
 import struct
 import binascii
 
@@ -11,7 +16,7 @@ def parse_tlv(raw_data):
             tag, length = struct.unpack("!BB", raw_data[:HEAD])
             value = struct.unpack("!%is"%length, raw_data[HEAD:(HEAD+length)])[0]
         except:
-            raise Exception("Broken TLV structure found.")
+            raise Exception("No TLV structure found.")
             break
         yield tag, value
         raw_data = raw_data[(HEAD+length):]
