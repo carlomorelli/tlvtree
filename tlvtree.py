@@ -26,8 +26,11 @@ def get_tlv_structure(data):
         return data
     else:
         for tag in d:
-            d[tag] = get_tlv_structure(d[tag])
-        return d
+            try:
+	        d[tag] = get_tlv_structure(d[tag])
+            except:
+	        print "Not able to decode more inner structure"
+            return d
 	
 class TLV(object):
     _dict = {}
@@ -38,9 +41,6 @@ class TLV(object):
 
 
 if __name__ == "__main__":
-	
-	mytlv = "\x11\x01\xff\x22\x01\xff" #4\xff\xff\xff\xff"
-	
-	z = TLV(mytlv)
-	
-	print z._dict
+    mytlv = "\x11\x01\xff\x22\x01\xff" #4\xff\xff\xff\xff"
+    z = TLV(mytlv)
+    print z._dict
