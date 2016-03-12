@@ -54,7 +54,7 @@ class TLVObject(object):
             string_array = []
             for item in d:
                 string_array.append("  "*rec_level + "[%s]" % item)
-                string_array.append("  "*rec_level + "%s" % recursive_dict_output(d[item], rec_level=rec_level+1))
+                string_array.append(recursive_dict_output(d[item], rec_level=rec_level+1))
             return "\n".join(string_array)
         print recursive_dict_output(self._tlv_dict)
  
