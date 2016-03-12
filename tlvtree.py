@@ -37,6 +37,17 @@ def get_tlv_structure(raw_data):
             d[tag]=new_dict
     return d
 
+def get_mask(tag_size):
+    if tag_size == 1:
+        return "!BB"
+    elif tag_size == 2:
+        return "!HH"
+    elif tag_size == 4:
+        return "!II"    
+    elif tag_size == 8:
+        return "!QQ"
+    return None
+
 
 class TLVObject(object):
 
