@@ -9,7 +9,7 @@ The usage of _tlvtree_ is very simple: just create the object by instantiating c
 The following snippet shows the main logic in using _tlvtree_:
 
 ```python
-import tlvtree
+from tlvtree import TLVTree
 myrawdata = "\xff\x04\xaa\xbb\xcc\xdd"
 z = TLVTree(myrawdata)
 print z.get_struct()
@@ -39,7 +39,7 @@ Consider the following:
 
 ```python
 tags = {
-		0x01: "The tag 1"
+		0x01: "The tag 1",
 		0x63: "The tag 63"
 		}
 z.set_tag_map(tags)
