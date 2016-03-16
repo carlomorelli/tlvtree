@@ -11,10 +11,14 @@ LEN_L = 1  #bytes
 
 INDENT = "    "
 def parse_tlv(raw_data, tag_size):
+    '''
+    Unpacks sequential raw data in string format to sequential TLV.
+    Yields an iteration of Tag/Value pairs found.
+    '''
     HEAD = 2 * tag_size
     while raw_data:
         try:
-            tag, length = struct.unpack(get_mask(tag_size), raw_data[:HEAD])
+            tag, length = struct.unpack(_get_mask(tag_size), raw_data[:HEAD])
             value = struct.unpack("!%is"%length, raw_data[HEAD:(HEAD+length)])[0]
         except:
             raise Exception("No TLV structure found.")
@@ -23,6 +27,10 @@ def parse_tlv(raw_data, tag_size):
         raw_data = raw_data[(HEAD+length):]
 
 def get_tlv_structure(raw_data, tag_size, debug=False):
+    '''
+    Returns a dictionary containing nested Tag/Value structure.
+    '''
+
     if debug:
         print "Decoding %s..." % binascii.hexlify(raw_data)
     d = {}
@@ -39,7 +47,8 @@ def get_tlv_structure(raw_data, tag_size, debug=False):
             d[tag]=new_dict
     return d
 
-def get_mask(tag_size):
+
+def _get_mask(tag_size):
     if tag_size == 1:
         return "!BB"
     elif tag_size == 2:
@@ -51,31 +60,62 @@ def get_mask(tag_size):
     return None
 
 
-class TLVObject(object):
+class TLVTree(object):
+    '''
+    Object representing a structured TLV data.
+    Usage:
+       mytlv = TLVTree(myrawdata, tag_size=1, debug=False)
+    '''
 
     _tlv_dict = {}
     _raw_data = ""
+    _tag_map_dict = {}
 
     def __init__(self, raw_data, tag_size=1, debug=False):
         self._raw_data = raw_data
         self._tag_size = tag_size
 
-        if not get_mask(tag_size):
+        if not _get_mask(tag_size):
             print "Warning: unrecognized tag size. Going to default to 1 byte length."
             self._tag_size = 1
         self._tlv_dict = get_tlv_structure(raw_data, self._tag_size, debug)
-        
-    def print_tree_struct(self):
+
+    def get_struct(self):
+        '''
+        Returns a string containing a formatted structure of the object in Tag/Value hierarchy.
+        '''
         def recursive_dict_output(d, rec_level=0):
             if not isinstance(d, dict):  
                 return INDENT*rec_level + "Raw data: %s" % binascii.hexlify(d)
             string_array = []
             for item in d:
-                string_array.append(INDENT*rec_level + "[Tag: %s]" % hex(item))
+                string_array.append(INDENT*rec_level + "[Tag: %s]" % self._tag_map_dict.get(item, hex(item)))
                 string_array.append(recursive_dict_output(d[item], rec_level=rec_level+1))
             return "\n".join(string_array)
-        print recursive_dict_output(self._tlv_dict)
- 
+        return recursive_dict_output(self._tlv_dict)
+
+    def get_dict(self):
+        '''
+        Returns a nested dictionary representing the formatted structure of the object in Tag/Value hierarchy.
+        '''
+        return self._tlv_dict
+
+    def set_tag_map(self, tag_map_dictionary):
+        '''
+        Applies a known map {Tag value: Tag symbolic name} to the created TLVObject, so that new get_struct()
+        and get_dict() calls can return a more meaningful formatted structure.
+        '''
+        self._tag_map_dict = tag_map_dictionary
+
+    def reset_tag_map(self):
+        '''
+        Removes any previous {Tag: symname} map configuration from the TLVObject, so that new calls from 
+        get_struct() and get_dict() return a numeric tag in formatted structure.
+        '''
+        self.set_tag_map(tag_map_dictionary={})
+
+
+
      
 if __name__ == '__main__':
     
@@ -92,10 +132,28 @@ if __name__ == '__main__':
 #   LEVEL3                                    T66 --  --  L03 --  --  --                                      T77 --  --  L01 --
 
 
-    p = TLVObject(tlv_n1)
-    p.print_tree_struct()
+    p = TLVTree(tlv_n1)
+    q = TLVTree(tlv_n2, tag_size=2)
 
+    print "== Normal structure for tlv_n1 =="
+    print p.get_struct()
+    print "== Normal structure for tlv_n2 =="
+    print q.get_struct()
 
+    my_tag_map = {
+                  0x11: "AAAA",
+                  0x22: "BBBB",
+                  0x33: "CCCC",
+                  0x44: "DDDD",
+                  0x55: "EEEE",
+                  0x66: "FFFF",
+                  0x77: "GGGG"
+                  }
 
-    q = TLVObject(tlv_n2, tag_size=2)
-    q.print_tree_struct()
+    p.set_tag_map(my_tag_map)
+    q.set_tag_map(my_tag_map)
+
+    print "== Formatted structure for tlv_n1 =="
+    print p.get_struct()
+    print "== Formatted structure for tlv_n2 =="
+    print q.get_struct()
