@@ -21,7 +21,7 @@ z = TLVObject(myrawdata, tag_size=2)
 Also a debug flag (default is False) is supported that shows what the parser is trying to decode, in hexadecimal format. This is most useful when analyzing packets or payload of packets carrying TLV structured information.
 
 ```python
- = TLVObject(myrawdata, debug=True)
+z = TLVObject(myrawdata, debug=True)
 ```
 
 Check out also more complex examples in the code where nested TLV levels can be found.
@@ -32,4 +32,5 @@ Initial release. Basic support of multilevel TLVs and pretty printer
 
 ####Release 0.2
 Support of multibyte tags (+ length fields) is added; supported sizes: 1, 2, 4 or 8 bytes
+
 Fixed tab spacing for pretty printer
