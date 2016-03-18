@@ -1,6 +1,6 @@
 # tlvtree
 Simple TLV structure analyzer in Python
-https://travis-ci.org/carlomorelli/tlvtree.svg?branch=master
+[![Build Status](https://travis-ci.org/carlomorelli/tlvtree.svg?branch=master)](https://travis-ci.org/carlomorelli/tlvtree)
 
 ## About
 _tlvtree_ is a recursive parser of bytestrings, which in Python 2.7.x are the default binary output format for file operations.
